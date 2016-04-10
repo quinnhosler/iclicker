@@ -10,23 +10,17 @@ use \Tsugi\Core\LTIX;
 // No parameter means we require CONTEXT, USER, and LINK
 $LTI = LTIX::requireData(); 
 
-//// Model
-//$p = $CFG->dbprefix;
-//$old_code = Settings::linkGet('code', '');
-//
-//if ( isset($_POST['code']) && isset($_POST['set']) && $USER->instructor ) {
+// Model
+$p = $CFG->dbprefix;
+$old_code = Settings::linkGet('code', '');
+
+// This section is only meant to process form POSTs. isset() are needed to 
+if ( $USER->instructor ) {
 //    Settings::linkSet('code', $_POST['code']);
 //    $_SESSION['success'] = 'Code updated';
 //    header( 'Location: '.addSession('index.php') ) ;
 //    return;
-//} else if ( isset($_POST['clear']) && $USER->instructor ) {
-//    $rows = $PDOX->queryDie("DELETE FROM {$p}attend WHERE link_id = :LI",
-//            array(':LI' => $LINK->id)
-//    );
-//    $_SESSION['success'] = 'Data cleared';
-//    header( 'Location: '.addSession('index.php') ) ;
-//    return;
-//} else if ( isset($_POST['code']) ) { // Student
+} else { // Student
 //    if ( $old_code == $_POST['code'] ) {
 //        $PDOX->queryDie("INSERT INTO {$p}attend
 //            (link_id, user_id, ipaddr, attend, updated_at)
@@ -44,7 +38,7 @@ $LTI = LTIX::requireData();
 //    }
 //    header( 'Location: '.addSession('index.php') ) ;
 //    return;
-//}
+}
 //
 //// View
 //$OUTPUT->header();
@@ -84,17 +78,24 @@ $LTI = LTIX::requireData();
 //    echo("</table>\n");
 //}
 
-//$OUTPUT->footer();
+$OUTPUT->footer();
 
 // View
 $OUTPUT->header();
 $OUTPUT->bodyStart();
 $OUTPUT->flashMessages();
-//$OUTPUT->welcomeUserCourse();
+
+if ( $USER->instructor ) {
+	echo("<h4>Congrats, you're an instructor</h4>");
+} else {
+	echo("<h4>Too bad, you're just a student</h4>");
+}
 
 echo <<< EOT
 <h2>This is the eventual home of a the new <b>iClicker</b> module</h2>
 EOT;
+
+
 
 $OUTPUT->footer();
 
