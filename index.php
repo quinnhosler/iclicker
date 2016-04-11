@@ -85,15 +85,47 @@ $OUTPUT->header();
 $OUTPUT->bodyStart();
 $OUTPUT->flashMessages();
 
+$javascript = <<< EOT
+<script src="http://autobahn.s3.amazonaws.com/js/autobahn.min.js"></script>
+<script>
+	var conn = new ab.Session('ws://colab-sbx-377.oit.duke.edu:8080',
+		function() {
+			console.log("This is running");
+			conn.subscribe('kittensCategory', function(topic, data) {
+				// This is where you would add the new article to the DOM (beyond the scope of this tutorial)
+				console.log('New article published to category "' + topic + '" : ' + data.title);
+			});
+		},
+		function() {
+			console.warn('WebSocket connection closed');
+		},
+		{'skipSubprotocolCheck': true}
+	);
+</script>
+EOT;
+
 if ( $USER->instructor ) {
+	
+	$entryData = array(
+			'category' => "kittensCategory",
+			'title'    => "test title",
+			'article'  => "test article",
+			'when'     => time()
+	);
+	
+	$context = new ZMQContext();
+	$socket = $context->getSocket(ZMQ::SOCKET_PUSH, 'my pusher');
+	$socket->connect("tcp://localhost:5555");
+
+	$socket->send(json_encode($entryData));
+	
 	echo("<h4>Congrats, you're an instructor</h4>");
 } else {
 	echo("<h4>Too bad, you're just a student</h4>");
+	echo($javascript);
 }
 
-echo <<< EOT
-<h2>This is the eventual home of a the new <b>iClicker</b> module</h2>
-EOT;
+echo("<h1>Welcome to the new <b>iClicker</b> module for Tsugi!</h1>");
 
 
 
