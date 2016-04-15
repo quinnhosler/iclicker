@@ -1,0 +1,62 @@
+<style>
+	.clicker {
+		margin: auto;
+		width:60%;
+	}
+
+	.question {
+		margin: auto;
+		border: 3px solid #73AD21;
+		margin-bottom: 5px;
+		padding-bottom: 20px;
+		margin-top: 5px;
+		padding-top: 20px;
+		text-align: center;
+	}
+
+	.multiple_choice {
+		/*text-align: center;*/
+	}
+
+	.answer {
+		width:100%;
+	}
+</style>
+
+<div class="clicker">
+	<div class='question'>
+	
+	</div>
+
+	<div class="choices">
+
+	</div>
+</div>
+
+
+
+<div class="templates" style="display:none">
+	<form class='multiple_choice' id="">
+		<div class="form-group answer">
+			<input class="btn btn-default" id="" type="button"></button>
+		</div>
+	</form>
+</div>
+
+<script src="http://autobahn.s3.amazonaws.com/js/autobahn.min.js"></script>
+<script>
+	document.addEventListener('DOMContentLoaded', function(){
+		var conn = new ab.Session('ws://colab-sbx-377.oit.duke.edu:8080',
+			function() {
+				conn.subscribe('multiple_choice', function(topic, data) {
+					alert("the instructor started a poll");
+					poll = $('.templates form.multiple_choice').clone();
+				});
+			},
+			function() {
+				console.warn('WebSocket connection closed');
+			},
+			{'skipSubprotocolCheck': true}
+		);
+	});
+</script>

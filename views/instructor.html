@@ -1,0 +1,35 @@
+<h4>Congrats, you're an instructor</h4>
+<h1>Welcome to the new <b>iClicker</b> module for Tsugi!</h1>
+
+<style>
+	form {
+		margin:auto;
+		width:60%;
+	}
+</style>
+
+<br>
+<form>
+	To announce your first poll to the class, hit this button!
+	<div class="form-group" align=center style="margin-top:5px">
+		<input class="btn btn-default" type="submit" value="Start">
+		<input type="hidden" name="test_field" value="this is a test"></input>
+	</div>
+</form>
+
+<script>
+// Since JQuery loaded @ bottom, must wait for DOM to load to use $
+document.addEventListener('DOMContentLoaded', function(){
+	// prevent form from posting on click
+	$('form').bind('submit',function(e){e.preventDefault();});
+	
+	// AJAX request to server on button click
+	$("input[type=submit]").click(function(event) {
+		// post form to server; "form" selected due to LTI requirements
+		$.post(location.href, $("form").serialize())
+			.done(function (data) {
+				alert(data);
+			});
+	});
+ });
+</script>
