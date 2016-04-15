@@ -15,11 +15,27 @@ $p = $CFG->dbprefix;
 $old_code = Settings::linkGet('code', '');
 
 // This section is only meant to process form POSTs. isset() are needed to 
-if ( $USER->instructor ) {
+if ( $USER->instructor && isset($_POST['test_field'])) {
 //    Settings::linkSet('code', $_POST['code']);
 //    $_SESSION['success'] = 'Code updated';
 //    header( 'Location: '.addSession('index.php') ) ;
 //    return;
+//	echo(implode(" ",$_POST));
+	$entryData = array(
+			'category' => "multiple_choice",
+			'title'    => "test title",
+			'article'  => "test article",
+			'when'     => time()
+	);
+	
+	$context = new ZMQContext();
+	$socket = $context->getSocket(ZMQ::SOCKET_PUSH, 'my pusher');
+	$socket->connect("tcp://localhost:5555");
+
+	$socket->send(json_encode($entryData));
+	
+	echo("poll sent to students!");
+	return;
 } else { // Student
 //    if ( $old_code == $_POST['code'] ) {
 //        $PDOX->queryDie("INSERT INTO {$p}attend
@@ -86,19 +102,6 @@ $OUTPUT->bodyStart();
 $OUTPUT->flashMessages();
 
 if ( $USER->instructor ) {
-	
-	$entryData = array(
-			'category' => "kittensCategory",
-			'title'    => "test title",
-			'article'  => "test article",
-			'when'     => time()
-	);
-	
-	$context = new ZMQContext();
-	$socket = $context->getSocket(ZMQ::SOCKET_PUSH, 'my pusher');
-	$socket->connect("tcp://localhost:5555");
-
-	$socket->send(json_encode($entryData));
 	
 	include "views/instructor.php";
 } else {
