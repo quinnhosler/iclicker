@@ -85,25 +85,6 @@ $OUTPUT->header();
 $OUTPUT->bodyStart();
 $OUTPUT->flashMessages();
 
-$javascript = <<< EOT
-<script src="http://autobahn.s3.amazonaws.com/js/autobahn.min.js"></script>
-<script>
-	var conn = new ab.Session('ws://colab-sbx-377.oit.duke.edu:8080',
-		function() {
-			console.log("This is running");
-			conn.subscribe('kittensCategory', function(topic, data) {
-				// This is where you would add the new article to the DOM (beyond the scope of this tutorial)
-				console.log('New article published to category "' + topic + '" : ' + data.title);
-			});
-		},
-		function() {
-			console.warn('WebSocket connection closed');
-		},
-		{'skipSubprotocolCheck': true}
-	);
-</script>
-EOT;
-
 if ( $USER->instructor ) {
 	
 	$entryData = array(
@@ -119,13 +100,10 @@ if ( $USER->instructor ) {
 
 	$socket->send(json_encode($entryData));
 	
-	echo("<h4>Congrats, you're an instructor</h4>");
+	include "views/instructor.php";
 } else {
-	echo("<h4>Too bad, you're just a student</h4>");
-	echo($javascript);
+	include "views/student.php";
 }
-
-echo("<h1>Welcome to the new <b>iClicker</b> module for Tsugi!</h1>");
 
 
 
