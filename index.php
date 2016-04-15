@@ -78,7 +78,7 @@ if ( $USER->instructor ) {
 //    echo("</table>\n");
 //}
 
-$OUTPUT->footer();
+//$OUTPUT->footer();
 
 // View
 $OUTPUT->header();
