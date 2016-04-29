@@ -29,8 +29,8 @@ $DATABASE_INSTALL = array(
 		poll_id INTEGER NOT NULL UNIQUE PRIMARY KEY AUTO_INCREMENT,
 		owner_id INTEGER NOT NULL,
 		active INTEGER NOT NULL,
-		modified INTEGER NOT NULL,
-		completed INTEGER
+		modified DATETIME NOT NULL,
+		completed DATETIME
 	)"),
 	
 	array( "{$CFG->dbprefix}iclicker_responses",
@@ -39,7 +39,7 @@ $DATABASE_INSTALL = array(
 		user_id INTEGER NOT NULL,
 		poll_id INTEGER NOT NULL, 
 		choice_id INTEGER NOT NULL,
-		timestamp INTEGER NOT NULL
+		timestamp DATETIME NOT NULL
 	)"),
 	
 	array( "{$CFG->dbprefix}iclicker_choices",
