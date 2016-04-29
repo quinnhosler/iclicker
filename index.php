@@ -14,13 +14,48 @@ $LTI = LTIX::requireData();
 $p = $CFG->dbprefix;
 $old_code = Settings::linkGet('code', '');
 
-// This section is only meant to process form POSTs. isset() are needed to 
+// This section is only meant to process form POSTs. isset() are needed too 
 if ( $USER->instructor && isset($_POST['test_field'])) {
 //    Settings::linkSet('code', $_POST['code']);
 //    $_SESSION['success'] = 'Code updated';
 //    header( 'Location: '.addSession('index.php') ) ;
 //    return;
 //	echo(implode(" ",$_POST));
+	$stmt = $PDOX->queryDie("INSERT INTO {$p}iclicker_polls (owner_id, active, modified) VALUES (:UI, 0, NOW())", 
+	array(
+		':UI' => $USER->id
+		)
+	);
+	if ($stmt->success) { $poll_id = $PDOX->lastInsertId(); }
+	else {
+		error_log("TODO: failed to obtain lastInsertId from PDOX. Should probably handle appropriately...");
+		throw new Exception("lastInsertId not obtained from PDOX");
+	}
+	
+//	process form data, be sure to sanatize input.
+	
+//	Need to check that owner doesn't have more than one active poll (or do I want to support this?)
+	$stmt = $PDOX->queryDie("INSERT INTO {$p}iclicker_active (poll_id, owner_id) VALUES (:ID, :UI)", 
+	array(
+		':ID' => $poll_id,
+		':UI' => $USER->id
+		)
+	);
+	if (!$stmt->success) {
+		error_log("TODO: unable to move to active. What to do...")
+		throw new Exception("failed to insert into active table");
+	}
+	
+	$stmt = $PDOX->queryDie("UPDATE {$p}iclicker_polls SET active = 1 WHERE poll_id = :ID",
+	array(
+		':ID' => $poll_id
+		)
+	);
+	if (!$stmt->success) {
+		error_log("TODO: does this really matter?");
+		throw new Exception("failed to modify to active");
+	}
+
 	$entryData = array(
 			'category' => "multiple_choice",
 			'title'    => "test title",
