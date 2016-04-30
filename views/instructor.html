@@ -1,35 +1,116 @@
 <h4>Congrats, you're an instructor</h4>
-<h1>Welcome to the new <b>iClicker</b> module for Tsugi!</h1>
+	<h1>Welcome to the new <b>iClicker</b> module for Tsugi!</h1>
 
-<style>
+	<style>
 	form {
 		margin:auto;
 		width:60%;
 	}
-</style>
+	</style>
 
-<br>
-<form>
+	<br>
+	<!-- <form>
 	To announce your first poll to the class, hit this button!
 	<div class="form-group" align=center style="margin-top:5px">
-		<input class="btn btn-default" type="submit" value="Start">
-		<input type="hidden" name="test_field" value="this is a test"></input>
+	<input class="btn btn-default" type="submit" value="Start">
+	<input type="hidden" name="test_field" value="this is a test"></input>
 	</div>
-</form>
+	</form> -->
 
-<script>
-// Since JQuery loaded @ bottom, must wait for DOM to load to use $
-document.addEventListener('DOMContentLoaded', function(){
-	// prevent form from posting on click
-	$('form').bind('submit',function(e){e.preventDefault();});
+	<form id='multiple-choice' class='active form-horizontal'>
+	<input type="hidden" name='type' value=multiple-choice>
+		<div class='form-group' id='choice'>
+			<label class='choice-number col-sm-2 control-label'>A)</label>
+			<div class="col-sm-10">
+				<div class="input-group">
+					<input name="choice" class='choice form-control' type='text'>
+				</div>
+			</div>
+		</div>
+		<div class='form-group' id='choice'>
+			<label class='choice-number col-sm-2 control-label'>B)</label>
+			<div class="col-sm-10">
+				<div class="input-group">
+					<input name="choice" class='choice form-control' type='text'>
+				</div>
+			</div>
+		</div>
+	</form>
+
+	<div class='form-group' style='margin-top:5px'>
+		<input type=button name='add-choice' class='btn btn-primary btn-block' value="Add Choice">
+	</div>
 	
-	// AJAX request to server on button click
-	$("input[type=submit]").click(function(event) {
-		// post form to server; "form" selected due to LTI requirements
-		$.post(location.href, $("form").serialize())
+	<input type='submit' class='btn btn-success btn-block'></input>
+
+	<!-- Template div -->
+	<div class='templates' style='display:none;'>
+		<div class='form-group' id='choice'>
+			<label class='choice-number col-sm-2 control-label'></label>
+			<div class="col-sm-10">
+				<div class="input-group">
+					<input name="choice" class='choice form-control' type='text'>
+					<div class="input-group-addon">-</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+	// Since JQuery loaded @ bottom, must wait for DOM to load to use $
+	document.addEventListener('DOMContentLoaded', function(){
+		// prevent form from posting on click
+		$('form').bind('submit',function(e){e.preventDefault();});
+
+		// AJAX request to server on button click
+		$("input[type=submit]").click(function(event) {
+			// post form to server; "form" selected due to LTI requirements
+			$.post(location.href, $("form#multiple-choice").serializeObject())
 			.done(function (data) {
 				alert(data);
 			});
+		});
+
+		function incrementChoice(input) {
+			input = input.replace(")","");
+			if (input.length > 1) throw "cannot increment strings longer than one character";
+			if (input.charCodeAt(0) >= 48 && input.charCodeAt(0) <= 57) {
+				return parseInt(input)+1;
+			}
+			return String.fromCharCode(input.charCodeAt(0)+1);
+		}
+
+
+		$.fn.serializeObject = function () {
+			var o = {};
+			var a = this.serializeArray();
+			$.each(a, function() {
+				debugger;
+				if (this.name in o) {
+					if (typeof(o[this.name]) == 'object')
+						o[this.name].push(this.value);
+					else {
+						var tmp = o[this.name];
+						o[this.name] = [tmp,this.value];
+					}
+				} else {
+					o[this.name] = this.value;
+				}
+			});
+			return o;
+		}
+
+		$("input[name=add-choice]").click(function(event) {
+			var choice = $("div.templates div#choice").clone();
+			var number = $('form#multiple-choice div#choice').last().find('label.choice-number').text();
+			choice.find('label.choice-number').text(incrementChoice(number)+")");
+			$("form#multiple-choice").append(choice).slideDown(1.0);
+		});
+
+		$("form#multiple-choice").on('click', 'div.input-group-addon', function(event) {
+			$(event.toElement.closest('div#choice')).fadeOut(400, function () {
+				this.remove();
+			});
+		});
 	});
- });
-</script>
+	</script>
