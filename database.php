@@ -20,31 +20,46 @@ $DATABASE_UNINSTALL = array(
 $DATABASE_INSTALL = array(
 	array( "{$CFG->dbprefix}iclicker_active",
 	"create table {$CFG->dbprefix}iclicker_active (
-		poll_id INTEGER NOT NULL,
-		owner_id INTEGER NOT NULL
+		context_id INTEGER NOT NULL UNIQUE,
+		poll_id INTEGER NOT NULL
 	)"),
 	
 	array( "{$CFG->dbprefix}iclicker_polls",
 	"create table {$CFG->dbprefix}iclicker_polls (
 		poll_id INTEGER NOT NULL UNIQUE PRIMARY KEY AUTO_INCREMENT,
 		owner_id INTEGER NOT NULL,
-		active INTEGER NOT NULL,
+		answer_id INTEGER,
+		ordered INTEGER,
 		modified DATETIME NOT NULL,
 		completed DATETIME
 	)"),
 	
 	array( "{$CFG->dbprefix}iclicker_responses",
 	"create table {$CFG->dbprefix}iclicker_responses (
-		response_id INTEGER NOT NULL UNIQUE PRIMARY KEY AUTO_INCREMENT,
+		response_id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
 		user_id INTEGER NOT NULL,
 		poll_id INTEGER NOT NULL, 
 		choice_id INTEGER NOT NULL,
-		timestamp DATETIME NOT NULL
+		timestamp TIMESTAMP NOT NULL,
+		UNIQUE KEY unique_index (poll_id, user_id)
 	)"),
 	
 	array( "{$CFG->dbprefix}iclicker_choices",
 	"create table {$CFG->dbprefix}iclicker_choices (
 		choice_id INTEGER NOT NULL UNIQUE AUTO_INCREMENT PRIMARY KEY,
 		choice_value TEXT
+	)"),
+	
+	array( "{$CFG->dbprefix}iclicker_pollchoices",
+	"create table {$CFG->dbprefix}iclicker_pollchoices (
+		poll_id INTEGER NOT NULL,
+		choice_id INTEGER NOT NULL
+	)"),
+	
+	array( "{$CFG->dbprefix}iclicker_order",
+	"create table {$CFG->dbprefix}iclicker_order (
+		poll_id INTEGER NOT NULL,
+		choice_id INTEGER NOT NULL,
+		position INTEGER NOT NULL
 	)")
 );
