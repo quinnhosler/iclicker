@@ -6,6 +6,7 @@ require_once "../../config.php";
 
 use \Tsugi\Core\Settings;
 use \Tsugi\Core\LTIX;
+use \Tsugi\Core\Cache;
 
 // No parameter means we require CONTEXT, USER, and LINK
 $LTI = LTIX::requireData(); 
@@ -14,14 +15,12 @@ $LTI = LTIX::requireData();
 $p = $CFG->dbprefix;
 $old_code = Settings::linkGet('code', '');
 
-// This section is only meant to process form POSTs. isset() are needed too 
-if ( $USER->instructor && isset($_POST['test_field'])) {
-//    Settings::linkSet('code', $_POST['code']);
-//    $_SESSION['success'] = 'Code updated';
-//    header( 'Location: '.addSession('index.php') ) ;
-//    return;
-//	echo(implode(" ",$_POST));
-	$stmt = $PDOX->queryDie("INSERT INTO {$p}iclicker_polls (owner_id, active, modified) VALUES (:UI, 0, NOW())", 
+
+
+if ( $USER->instructor && isset($_POST['type'])) {
+
+//	create poll in DB
+	$stmt = $PDOX->queryDie("INSERT INTO {$p}iclicker_polls (owner_id, modified) VALUES (:UI, NOW())", 
 	array(
 		':UI' => $USER->id
 		)
@@ -32,34 +31,76 @@ if ( $USER->instructor && isset($_POST['test_field'])) {
 		throw new Exception("lastInsertId not obtained from PDOX");
 	}
 	
-//	process form data, be sure to sanatize input.
 	
-//	Need to check that owner doesn't have more than one active poll (or do I want to support this?)
-	$stmt = $PDOX->queryDie("INSERT INTO {$p}iclicker_active (poll_id, owner_id) VALUES (:ID, :UI)", 
-	array(
-		':ID' => $poll_id,
-		':UI' => $USER->id
-		)
-	);
-	if (!$stmt->success) {
-		error_log("TODO: unable to move to active. What to do...")
-		throw new Exception("failed to insert into active table");
+//	insert choices into DB
+	$choice_ids = array();
+	foreach ($_POST['choice'] as $choice) {
+		$stmt = $PDOX->queryDie("INSERT INTO {$p}iclicker_choices (choice_hash, choice_value) 
+								VALUES (PASSWORD(:VAL), :VAL) 
+								ON DUPLICATE KEY UPDATE choice_id=LAST_INSERT_ID(choice_id), choice_value=:VAL",
+		array(
+			':VAL' => $choice
+			)
+		);
+		if ($stmt->success) { $choice_ids[$PDOX->lastInsertId()] = $choice; }
+		else {
+			error_log("TODO: failed to obtain lastInsertId from PDOX. Should probably handle appropriately...");
+			throw new Exception("lastInsertId not obtained from PDOX");
+		}
 	}
 	
-	$stmt = $PDOX->queryDie("UPDATE {$p}iclicker_polls SET active = 1 WHERE poll_id = :ID",
+//	associate poll and choices in DB
+	foreach (array_keys($choice_ids) as $id) {
+		$stmt = $PDOX->queryDie("INSERT INTO {$p}iclicker_pollchoices (poll_id, choice_id) VALUES (:PID,:CID)",
+		array(
+			':PID' => $poll_id,
+			':CID' => $id
+			)
+		);
+		if (!$stmt->success) { throw new Exception("cannot associate poll and choices"); }
+	}
+	
+//	if choices should be ordered
+	if (isset($_POST['ordered'])) {
+		
+//		mark poll as ordered
+		$PDOX->queryDie("UPDATE {$p}iclicker_polls SET ordered=1 WHERE poll_id=".$poll_id);
+		
+//		store ordering in DB
+		$i = 0;
+		foreach (array_keys($choice_ids) as $id) {
+			$stmt = $PDOX->queryDie("INSERT INTO {$p}iclicker_order (poll_id, choice_id, position) VALUES (:PID,:CID,:POS)",
+			array(
+				':PID'=> $poll_id,
+				':CID' => $id,
+				':POS' => $i
+				)
+			);
+			if (!$stmt->success) { throw new Exception("Failed to record position"); }
+			$i++;
+		}
+	}
+	
+//	process form data, be sure to sanatize input!
+//	Need to check that owner doesn't have more than one active poll (or do I want to support this?)
+	$stmt = $PDOX->queryDie("INSERT INTO {$p}iclicker_active (poll_id, context_id) VALUES (:ID, :CID) 
+							ON DUPLICATE KEY UPDATE poll_id=:ID", 
 	array(
-		':ID' => $poll_id
+		':ID' => $poll_id,
+		':CID' => $CONTEXT->id
 		)
 	);
 	if (!$stmt->success) {
-		error_log("TODO: does this really matter?");
-		throw new Exception("failed to modify to active");
+		error_log("TODO: unable to move to active. What to do...");
+		throw new Exception("failed to insert into active table");
 	}
 
 	$entryData = array(
-			'category' => "multiple_choice",
-			'title'    => "test title",
-			'article'  => "test article",
+			'category' => 'polls',
+			'type' => $_POST['type'],
+			'poll' => $poll_id,
+			'choices'  => $choice_ids,
+			'order' => 'random',
 			'when'     => time()
 	);
 	
@@ -72,6 +113,95 @@ if ( $USER->instructor && isset($_POST['test_field'])) {
 	echo("poll sent to students!");
 	return;
 } else { // Student
+	
+//	iclicker API values, action specifies response
+	if (isset($_POST['action']) && strcmp($_POST['action'], "get_active") == 0) {
+		$cacheloc = 'iclicker_active';
+		$row = Cache::check($cacheloc, $CONTEXT->id);
+		
+		// if $row not found in cache
+		if ( $row == false ) {
+			$stmt = $PDOX->queryDie("SELECT poll_id FROM {$p}iclicker_active WHERE context_id=:CID",
+				array(
+					':CID' => $CONTEXT->id
+				)
+		    );
+			$row = $stmt->fetch(PDO::FETCH_ASSOC);
+		}
+		
+//		if no active poll, echo empty response
+		if (!$row['poll_id']) {
+			echo('');
+			return;
+		}
+		
+//		if poll is ordered, get choices and postions
+		if (isset($row['ordered'])) {
+			$stmt = $PDOX->queryDie("SELECT pc.poll_id, c.choice_id, c.choice_value, o.position
+									FROM iclicker_pollchoices pc INNER JOIN iclicker_choices c
+									ON pc.choice_id = c.choice_id JOIN iclicker_order o
+									ON c.choice_id = o.choice_id AND pc.poll_id = o.poll_id
+									WHERE pc.poll_id = :PID", 
+			array(
+				':PID' => $row['poll_id']
+				)
+			);
+			$row = $stmt->fetch(PDO::FETCH_ASSOC);
+		} 
+//		if not ordered, get choices
+		else {
+			$stmt = $PDOX->queryDie("SELECT pc.poll_id, c.choice_id, c.choice_value
+									FROM iclicker_pollchoices pc INNER JOIN iclicker_choices c
+									ON pc.choice_id = c.choice_id
+									WHERE pc.poll_id = :PID", 
+			array(
+				':PID' => $row['poll_id']
+				)
+			);
+			$row = $stmt->fetchAll(PDO::FETCH_ASSOC);
+		}
+		
+//		return response
+		echo(json_encode($row));
+		return;
+	}
+	
+	else if (isset($_POST['action']) && strcmp($_POST['action'], "vote") == 0) {
+		$stmt = $PDOX->queryDie("SELECT * from iclicker_active WHERE poll_id=:PID",array(':PID'=>$_POST['poll_id']));
+		$row = $stmt->fetch(PDO::FETCH_ASSOC);
+		if (!$row) {
+			echo "expired poll";
+			return;
+		}
+		
+		$stmt = $PDOX->queryDie("INSERT INTO {$p}iclicker_responses (user_id, poll_id, choice_id) VALUES (:UID,:PID,:CID) 
+								ON DUPLICATE KEY UPDATE choice_id = :CID",
+		array(
+			':UID' => $USER->id,
+			':PID' => $_POST['poll_id'],
+			':CID' => $_POST['choice_id']
+			)
+		);
+		if (!$stmt->success) { echo("false"); throw new Exception("unable to record response"); return; }
+		echo("true");
+		return;
+	}
+	
+	else if (isset($_POST['action']) && strcmp($_POST['action'], "get_vote") == 0) {
+		$stmt = $PDOX->queryDie("SELECT choice_id FROM {$p}iclicker_responses WHERE user_id=:UID AND poll_id=:PID",
+		array(
+			':UID' => $USER->id,
+			':PID' => $_POST['poll_id']
+			)
+		);
+		$row = $stmt->fetch(PDO::FETCH_ASSOC);
+		echo(json_encode($row));
+		return;
+	}
+	
+	
+	
+
 //    if ( $old_code == $_POST['code'] ) {
 //        $PDOX->queryDie("INSERT INTO {$p}attend
 //            (link_id, user_id, ipaddr, attend, updated_at)
