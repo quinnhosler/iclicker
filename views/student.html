@@ -1,17 +1,27 @@
-<style>
+	<style>
 	.clicker {
 		margin: auto;
 		width:60%;
 	}
 
-	.question {
-		margin: auto;
+	form {
+		margin: 50px;
 		border: 3px solid #73AD21;
 		margin-bottom: 5px;
 		padding-bottom: 20px;
 		margin-top: 5px;
 		padding-top: 20px;
 		text-align: center;
+	}
+
+	.btn-block {
+		max-width: 400px;
+	}
+
+	div#choice button {
+		text-align: left;
+		padding-left: 10px;
+		padding-right:10px;
 	}
 
 	.multiple_choice {
@@ -23,34 +33,77 @@
 	}
 </style>
 
-<div class="clicker">
-	<div class='question'>
-	
-	</div>
-
-	<div class="choices">
-
-	</div>
+<div id="main">
 </div>
 
 
 
 <div class="templates" style="display:none">
-	<form class='multiple_choice' id="">
-		<div class="form-group answer">
-			<input class="btn btn-default" id="" type="button"></button>
-		</div>
+	<form id='multiple-choice' class='active form-horizontal' data=''>
 	</form>
+	<div class='form-group' id='choice' data="">
+		<button class="btn btn-primary btn-block form-control"></button>
+	</div>
 </div>
 
 <script src="http://autobahn.s3.amazonaws.com/js/autobahn.min.js"></script>
 <script>
+
+
+	function populateMultipleChoice(data) {
+		poll = $('div.templates form#multiple-choice').clone();
+		poll.attr('data', data.poll);
+		for (var key in data.choices) {
+			var choice = $('div.templates div#choice').clone();
+			choice.find('button').text(data.choices[key]);
+			choice.attr('data', key);
+			poll.append(choice);
+		}
+		$('div#main').html(poll);
+	}
+
+	function getVoted(poll_id) {
+		$.post(location.href, {action:'get_vote',poll_id:poll_id})
+			.done(function(response) {
+				if (!response) return;
+				response = JSON.parse(response);
+				markVoted(response["choice_id"])
+			});
+	}
+
+	function markVoted(choice_id) {
+		$('form div#choice button').removeClass('btn-danger');
+		$('form div#choice[data='+choice_id+'] button').addClass('btn-danger');
+	}
+
 	document.addEventListener('DOMContentLoaded', function(){
+
+		$('form').bind('submit',function(e){e.preventDefault();});
+
+
+		$("div#main").on('click', 'button', function (event) {
+			// debugger;
+			var target = $(event.currentTarget);
+			target.parents('form').bind('submit', function(e){e.preventDefault();});
+
+			var data = {
+				poll_id: target.parents('form').attr('data'),
+				choice_id: target.parents('div#choice').attr('data'),
+				action: 'vote'
+			}
+			console.log(data);
+			$.post(location.href, data)
+				.done(function(response) {
+					if (response == "true") {
+						markVoted(data.choice_id);
+					}
+				})
+		});
+
 		var conn = new ab.Session('ws://colab-sbx-377.oit.duke.edu:8080',
 			function() {
-				conn.subscribe('multiple_choice', function(topic, data) {
-					alert("the instructor started a poll");
-					poll = $('.templates form.multiple_choice').clone();
+				conn.subscribe('polls', function(topic, data) {
+					populateMultipleChoice(data);
 				});
 			},
 			function() {
@@ -58,5 +111,19 @@
 			},
 			{'skipSubprotocolCheck': true}
 		);
+
+		$.post(location.href, {'action': 'get_active'})
+			.done(function (response) {
+				if (!response) return;
+				response = JSON.parse(response);
+				var choices = {}
+				for (var i in response) {
+					choices[response[i].choice_id] = response[i].choice_value
+				}
+				data = {"choices":choices};
+				data.poll = response[0].poll_id;
+				populateMultipleChoice(data);
+				getVoted(data.poll);
+			});
 	});
 </script>
