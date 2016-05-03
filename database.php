@@ -27,7 +27,7 @@ $DATABASE_INSTALL = array(
 	array( "{$CFG->dbprefix}iclicker_polls",
 	"create table {$CFG->dbprefix}iclicker_polls (
 		poll_id INTEGER NOT NULL UNIQUE PRIMARY KEY AUTO_INCREMENT,
-		owner_id INTEGER NOT NULL,
+		context_id INTEGER NOT NULL,
 		answer_id INTEGER,
 		ordered INTEGER,
 		modified DATETIME NOT NULL,
