@@ -1,62 +1,247 @@
-<h4>Congrats, you're an instructor</h4>
-	<h1>Welcome to the new <b>iClicker</b> module for Tsugi!</h1>
+<!-- 	<h1>Welcome to the new <b>iClicker</b> module for Tsugi!</h1> -->
 
-	<style>
+<style>
 	form {
 		margin:auto;
 		width:60%;
 	}
-	</style>
 
-	<br>
-	<!-- <form>
-	To announce your first poll to the class, hit this button!
-	<div class="form-group" align=center style="margin-top:5px">
-	<input class="btn btn-default" type="submit" value="Start">
-	<input type="hidden" name="test_field" value="this is a test"></input>
+	.btn-block {
+		max-width: 664px;
+	}
+
+	#alerts {
+		height:100px;
+	}
+
+	.alert {
+		max-width: 664px;
+	}
+
+	.spinner {
+		margin: auto;
+		width: 50px;
+		height: 40px;
+		text-align: center;
+		font-size: 10px;
+	}
+
+	.spinner > div {
+		background-color: #333;
+		height: 100%;
+		width: 6px;
+		display: inline-block;
+
+		-webkit-animation: sk-stretchdelay 1.2s infinite ease-in-out;
+		animation: sk-stretchdelay 1.2s infinite ease-in-out;
+	}
+
+	.spinner .rect2 {
+		-webkit-animation-delay: -1.1s;
+		animation-delay: -1.1s;
+	}
+
+	.spinner .rect3 {
+		-webkit-animation-delay: -1.0s;
+		animation-delay: -1.0s;
+	}
+
+	.spinner .rect4 {
+		-webkit-animation-delay: -0.9s;
+		animation-delay: -0.9s;
+	}
+
+	.spinner .rect5 {
+		-webkit-animation-delay: -0.8s;
+		animation-delay: -0.8s;
+	}
+
+	@-webkit-keyframes sk-stretchdelay {
+		0%, 40%, 100% { -webkit-transform: scaleY(0.4) }  
+		20% { -webkit-transform: scaleY(1.0) }
+	}
+
+	@keyframes sk-stretchdelay {
+		0%, 40%, 100% { 
+			transform: scaleY(0.4);
+			-webkit-transform: scaleY(0.4);
+		}  20% { 
+			transform: scaleY(1.0);
+			-webkit-transform: scaleY(1.0);
+		}
+	}
+
+	div#active-table {
+		min-height: 105px;
+	}
+</style>
+<nav class="navbar navbar-default">
+	<div class="container-fluid">
+		<!-- Brand and toggle get grouped for better mobile display -->
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+				<span class="sr-only">Toggle navigation</span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</button>
+			<a class="navbar-brand" href="#">iClicker</a>
+		</div>
+
+		<!-- Collect the nav links, forms, and other content for toggling -->
+		<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+			<ul class="nav navbar-nav">
+				<li class="dropdown">
+					<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">New Quick Poll<span class="caret"></span></a>
+					<ul class="dropdown-menu">
+						<li><a id='yn'>Yes/No</a></li>
+						<li><a id='tf'>True/False</a></li>
+						<li><a id='4c'>4 Choice</a></li>
+						<li><a id='5c'>5 Choice</a></li>
+						<li role="separator" class="divider"></li>
+						<li><a id='cp'>Custom Poll</a></li>
+					</ul>
+				</li>
+				<li class="active"><a href="#">Link <span class="sr-only">(current)</span></a></li>
+				<li><a href="#">Link</a></li>
+			</ul>
+			<form class="navbar-form navbar-left" role="search">
+				<div class="form-group">
+					<input type="text" class="form-control" placeholder="Search">
+				</div>
+				<button type="submit" class="btn btn-default">Submit</button>
+			</form>
+			<ul class="nav navbar-nav navbar-right">
+				<li><a href="#">Link</a></li>
+				<li class="dropdown">
+					<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>
+					<ul class="dropdown-menu">
+						<li><a href="#">Action</a></li>
+						<li><a href="#">Another action</a></li>
+						<li><a href="#">Something else here</a></li>
+						<li role="separator" class="divider"></li>
+						<li><a href="#">Separated link</a></li>
+					</ul>
+				</li>
+			</ul>
+		</div><!-- /.navbar-collapse -->
+	</div><!-- /.container-fluid -->
+</nav>
+
+
+<div id='main' style="min-height: 300px;">
+
+	<div id="alerts" align=center style="display: none;">
+		<div class="alert alert-success" role="alert" style='display:none;'>
+			<strong>Success!</strong> <span id='message'></span>
+		</div>
+		<div class='alert alert-danger' role='alert' style='display: none;'>
+			<strong>Error!</strong> <span id='message'></span>
+		</div>
 	</div>
-	</form> -->
 
-	<form id='multiple-choice' class='active form-horizontal'>
-	<input type="hidden" name='type' value=multiple-choice>
-		<div class='form-group' id='choice'>
-			<label class='choice-number col-sm-2 control-label'>A)</label>
-			<div class="col-sm-10">
-				<div class="input-group">
-					<input name="choice" class='choice form-control' type='text'>
+	<canvas id="chart" style="display: none;">
+	</canvas>
+
+	<div id="timer" align="center" style="font-family: monospace; display: none;">
+		<span id="seconds" style="font-size: 200px">60</span>
+		<br>
+		<span style="font-size: 50px">seconds</span>
+	</div>
+
+
+
+	<div id='custom-poll' style='margin-top: 50px; display: none;'>
+		<form id='multiple-choice' class='form-horizontal' style="">
+		<h3 align=center>Custom Poll Form</h3>
+			<input type="hidden" name='type' value=multiple-choice>
+			<div class="form-group" id='title'>
+				<label>Title</label>
+				<input class="form-control" name='title'>
+			</div>
+			<div id="choices">
+				<div class="form-group" id='choice'>
+					<label>Choices</label>
+					<input class="form-control" name='choice'>
+				</div>
+				<div class="form-group" id='choice'>
+					<input class="form-control" name='choice'>
 				</div>
 			</div>
-		</div>
-		<div class='form-group' id='choice'>
-			<label class='choice-number col-sm-2 control-label'>B)</label>
-			<div class="col-sm-10">
-				<div class="input-group">
-					<input name="choice" class='choice form-control' type='text'>
-				</div>
+			<div class='form-group'>
+				<label>Options</label><br>
+				<label class="checkbox-inline">
+					<input type="checkbox" id="random" value="option1">Random
+				</label>
+				<label class="checkbox-inline">
+					<input type="checkbox" id="immediately" value="option2" checked>Start Immediately
+				</label>
+				<label class="checkbox-inline">
+					<input type="checkbox" id="quick" value="option3" checked> Quick Poll
+				</label>
 			</div>
-		</div>
-	</form>
-
-	<div class='form-group' style='margin-top:5px'>
-		<input type=button name='add-choice' class='btn btn-primary btn-block' value="Add Choice">
-	</div>
-	
-	<input type='submit' class='btn btn-success btn-block'></input>
-
-	<!-- Template div -->
-	<div class='templates' style='display:none;'>
-		<div class='form-group' id='choice'>
-			<label class='choice-number col-sm-2 control-label'></label>
-			<div class="col-sm-10">
-				<div class="input-group">
-					<input name="choice" class='choice form-control' type='text'>
-					<div class="input-group-addon">-</div>
-				</div>
+			<div class="col-lg-6 col-xl-6 col-md-6 col-sm-6 col-xs-6" style="padding-right: 5px; padding-left: 0px">
+				<input type=button name='add-choice' class='btn btn-primary btn-block' value="Add Choice">
 			</div>
+			<div class="col-lg-6 col-xl-6 col-md-6 col-sm-6 col-xs-6" style="padding-right: 0px; padding-left: 5px">
+				<input type='submit' class='btn btn-success btn-block' value="Start">
+			</div>
+		</form>
+	</div>
+</div>
+
+<div id="active-table" style="padding-top:50px;min-height: 171px">
+	<h4 style="display: block;">Active Polls</h4>
+	<table class="table table-hover" id="active">
+		<thead> 
+			<tr> <th>Title</th> <th>Created</th> <th>Responses</th> <th>Retract</th> </tr> 
+		</thead>
+		<tbody> 
+
+		</tbody>
+	</table>
+</div>
+<!-- http://tobiasahlin.com/spinkit/ -->
+<!-- <div class="spinner"><div class="rect1"></div><div class="rect2"></div><div class="rect3"></div><div class="rect4"></div><div class="rect5"></div></div> -->
+
+<h4>Past Polls</h4>
+<table class="table table-hover" id="archive" style="margin-bottom: 0px">
+	<thead> 
+		<tr> <th>Title</th> <th>Completed</th> <th>Responses</th> <th>Correct</th> </tr> 
+	</thead>
+	<tbody> 
+		 
+	</tbody>
+	<tfoot>
+	</tfoot>
+</table>
+<div align=center>
+	<a id='more'>See More</a>
+</div>
+
+
+<!-- form for poll-->
+
+<!-- Template div -->
+<div class='templates' style='display:none;'>
+	<div class='form-group' id='choice'>
+		<div class="input-group">
+			<input name="choice" class='choice form-control' type='text'>
+			<div class="input-group-addon">Remove</div>
 		</div>
 	</div>
 
-	<script>
+	<table>
+		<tbody id="active">
+			<tr id="poll" data=""> <td id="title"></td> <td id="date"></td> <td id="responses"></td> <td><button class='btn btn-default btn-xs' id='retract'>Retract</button></td> </tr> 
+		</tbody>
+		<tbody id="archive">
+			<tr id="poll" data=""> <td id="title"></td> <td id="date"></td> <td id="responses"></td> <td id='correct'></td> </tr> 
+		</tbody>
+	</table>
+</div>
+<script src="https://cdn.rawgit.com/nnnick/Chart.js/v2.0-dev/dist/Chart.js"></script>
+<script>
 	// Since JQuery loaded @ bottom, must wait for DOM to load to use $
 	document.addEventListener('DOMContentLoaded', function(){
 		// prevent form from posting on click
@@ -65,9 +250,20 @@
 		// AJAX request to server on button click
 		$("input[type=submit]").click(function(event) {
 			// post form to server; "form" selected due to LTI requirements
-			$.post(location.href, $("form#multiple-choice").serializeObject())
+			var form_data = $("form#multiple-choice").serializeObject();
+			if (form_data.choice.indexOf("") >= 0) {
+				errorAlert("You left a choice field blank",3000)
+				return;
+			}
+			$.post(location.href, form_data)
 			.done(function (data) {
-				alert(data);
+				$('form#multiple-choice')[0].reset();
+				successAlert("Your poll was successfully sent to the class!", 5000);
+				data = JSON.parse(data);
+				data.title = form_data.title;
+				data.count = "0";
+				prependToTable('active', data, true);
+				$('div#custom-poll').fadeOut();
 			});
 		});
 
@@ -85,7 +281,6 @@
 			var o = {};
 			var a = this.serializeArray();
 			$.each(a, function() {
-				debugger;
 				if (this.name in o) {
 					if (typeof(o[this.name]) == 'object')
 						o[this.name].push(this.value);
@@ -100,17 +295,317 @@
 			return o;
 		}
 
+		function getActive() {
+			$.post(location.href, {'action':'get_active'})
+			.done(function(response) {
+				console.log(response);
+				response = JSON.parse(response);
+				response.date = response.modified;
+				prependToTable('active', response, true);
+			})
+		}
+
+		function addActive(response) {
+			var row = $('div.templates table tr').clone();
+			row.attr('data', response.poll_id);
+			row.find('#date').text(response.modified);
+			row.find('#responses').text(response.count);
+			row.find('#correct').html("<button class='btn btn-default btn-xs' id='retract'>Retract</button>");
+			if (!response.title)
+				row.find('#title').text("Poll #"+response.poll_id);
+			else
+				row.find('#title').text(response.title);
+			$('table#active tbody').append(row);
+		}
+
+		function successAlert(message, duration) {
+			var alert = $('div.alert-success');
+			$('div.alert').finish();
+			alert.find('#message').text(message);
+			alert.fadeIn().delay(duration).fadeOut();
+		}
+
+		function errorAlert(message, duration) {
+			var alert = $('div#alerts .alert-danger');
+			$('div.alert').finish();
+			$('div#alerts').finish();
+			alert.find('#message').text(message);
+			$('div#alerts').slideDown(function () {
+				alert.fadeIn().delay(duration).fadeOut();
+			}).delay(duration).slideUp();
+		}
+
+		
+		
 		$("input[name=add-choice]").click(function(event) {
 			var choice = $("div.templates div#choice").clone();
-			var number = $('form#multiple-choice div#choice').last().find('label.choice-number').text();
-			choice.find('label.choice-number').text(incrementChoice(number)+")");
-			$("form#multiple-choice").append(choice).slideDown(1.0);
+			choice.hide();
+			choice.appendTo($("form#multiple-choice div#choices")).show('slide');
 		});
 
 		$("form#multiple-choice").on('click', 'div.input-group-addon', function(event) {
-			$(event.toElement.closest('div#choice')).fadeOut(400, function () {
+			$(event.toElement.closest('div#choice')).hide('slide',{direction:'left'}, function (event) {
 				this.remove();
-			});
+			})
 		});
+
+// 		Retract polls, remove from DOM, and alert
+$("table").on("click", "button#retract", function(event) {
+	event.stopPropagation();
+	retractPoll($(event.target).parents('tr').attr('data'));
+});
+
+function retractPoll(poll_id) {
+	$.post(location.href, {'action':'retract_poll', 'poll_id':poll_id})
+	.done(function(response) {
+		debugger;
+		if (response == 'true') {
+			successAlert("poll retracted", 2000);
+			$("table#active tr#poll").clone().prependTo($("table#archive tbody")).show('fade');
+			removeFromTable('active',poll_id);
+		}
 	});
-	</script>
+}
+
+function removeFromTable(table,poll_id) {
+	var row = $('table#'+table+' tr[data='+poll_id+']');
+	row.hide('fade', function () {
+		this.remove();
+	});
+			// row.remove();
+		}
+
+		function prependToTable(table,details,empty) {
+			var row = $('div.templates tbody#'+table+' tr').clone();
+			row.attr('data', details.poll_id);
+			row.find('#date').text(details.date);
+			row.find('#responses').text(details.count);
+			if (row.find('#correct').length > 0) 
+				row.find('#correct').text(details.correct||0)
+			if (!details.title)
+				row.find('#title').text("Poll #"+details.poll_id);
+			else
+				row.find('#title').text(details.title);
+			// $('table#'+table+' tbody').prepend(row);
+			row.hide();
+			if (empty)
+				row.prependTo($('table#'+table+' tbody').empty()).show('fade');
+			else
+				row.prependTo($('table#'+table+' tbody')).show('fade');
+		}
+
+		function appendToTable(table,details,empty) {
+			var row = $('div.templates tbody#'+table+' tr').clone();
+			row.attr('data', details.poll_id);
+			row.find('#date').text(details.date);
+			row.find('#responses').text(details.count);
+			if (row.find('#correct').length > 0) 
+				row.find('#correct').text(details.correct||0)
+			if (!details.title)
+				row.find('#title').text("Poll #"+details.poll_id);
+			else
+				row.find('#title').text(details.title);
+			// $('table#'+table+' tbody').prepend(row);
+			row.hide();
+			if (empty)
+				row.appendTo($('table#'+table+' tbody').empty()).show('fade');
+			else
+				row.appendTo($('table#'+table+' tbody')).show('fade');
+		}
+
+		function ajaxPost(data, cb) {
+			$.post(location.href,data)
+			.done(function(response) {
+				cb(JSON.parse(response));
+			});
+		}
+
+		$('ul.nav a#yn').click(function (event) {
+			ajaxPost({
+				choice: ['Yes','No'],
+				type:'multiple-choice'
+			}, function (response) {
+				successAlert("Your poll was successfully sent to the class!", 5000);
+				response.count = "0";
+				prependToTable('active', response, true);
+				startTimer(response.poll_id);
+			})
+		});
+
+		$('nav a#tf').click(function (event) {
+			ajaxPost({
+				choice: ['True','False'],
+				type: 'multiple-choice'
+			}, function (response) {
+				successAlert("Your poll was successfully sent to the class!", 5000);
+				response.count = "0";
+				prependToTable('active', response, true);
+				startTimer(response.poll_id);
+			})
+		});
+
+		$('nav a#4c').click(function (event) {
+			ajaxPost({
+				choice: ['A','B', 'C', 'D'],
+				type:'multiple-choice'
+			}, function (response) {
+				successAlert("Your poll was successfully sent to the class!", 5000);
+				response.count = "0";
+				prependToTable('active', response,true);
+				startTimer(response.poll_id);
+			})
+		});
+
+		$('nav a#5c').click(function (event) {
+			ajaxPost({
+				choice: ['A','B', 'C', 'D', 'E'],
+				type:'multiple-choice'
+			}, function (response) {
+				successAlert("Your poll was successfully sent to the class!", 5000);
+				response.count = "0";
+				prependToTable('active', response,true);
+				startTimer(response.poll_id);
+			})
+		});
+
+		$('nav a#cp').click(function (event) {
+			function pollIn() {$('div#custom-poll').fadeIn();}
+			if ($('div#timer').is(":visible"))
+				$('div#timer').slideUp(pollIn);
+			if ($("div#main canvas#chart").is(":visible"))
+				$("div#main canvas#chart").slideUp(pollIn)
+			else
+				pollIn();
+		});
+
+		$('input[type=checkbox]#immediately').change(function(event) {
+			if ($(event.currentTarget).is(":checked")) {
+				$('input[type=submit]').val("Start");
+			} else {
+				$('input[type=submit]').val("Save");
+			}
+		})
+
+		$('a#more').click(function(event) {
+			getArchive($('table#archive tr').length-1);
+		})
+
+		function getArchive(range,prepend) {
+			ajaxPost({
+				action: 'get_archive',
+				range: ""+range
+
+			}, function (response) {
+				for (i in response) {
+					if (prepend)
+						prependToTable('archive',response[i],false);
+					else
+						appendToTable('archive',response[i],false);
+				}
+			});
+		}
+
+		function processResponses(title,response) {
+			responses = response.responses;
+			choices = []
+			for (i in response.choices)
+				choices.push(response.choices[i].value)
+			var data = {
+				labels: choices, 
+				datasets: [
+					{ 
+						label: title,
+						backgroundColor: "rgba(75,192,192,0.4)",
+						borderColor: "rgba(75,192,192,1)",
+						hoverBackgroundColor: "rgba(75,192,192,1)",
+						hoverBorderColor: "rgba(220,220,220,1)",
+						data: []
+					}
+				]
+			};
+
+			for (i in responses) {
+				data.datasets[0].data[choices.indexOf(responses[i].value)] = responses[i].count;
+			}
+			for (var i = 0; i < data.labels.length; i++) {
+				if (data.datasets[0].data[i] == null)
+					data.datasets[0].data[i] = 0
+			}
+			return data;
+		}
+
+		var interval;
+		function startTimer(poll_id) {
+			function timerIn() {$('div#timer').fadeIn();}
+			if ($('div#custom-poll').is(":visible"))
+				$('div#custom-poll').fadeOut(timerIn);
+			else if ($("div#main canvas#chart").is(":visible"))
+				$("div#main canvas#chart").fadeOut(timerIn);
+			else
+				timerIn()
+
+			var d = new Date();
+			var seconds = $('div#timer span#seconds')
+			localStorage.setItem(""+poll_id, d.setSeconds(d.getSeconds() + 60));
+			if (interval)
+				clearInterval(interval);
+			interval = window.setInterval(function () {
+				// debugger;
+				var diff = localStorage[poll_id] - (new Date().setSeconds(new Date().getSeconds()))
+				seconds.text(""+parseInt(diff/1000));
+				if (diff/1000 <= 0) {
+					retractPoll(poll_id);
+					clearInterval(interval);
+					ajaxPost({action:'get_poll', poll_id:poll_id},
+						function (response) {
+							debugger;
+							$('div#timer').fadeOut(function () {
+								drawChart(response);
+							})
+						})
+				}
+			}, 500);
+		}
+
+		var myBarChart;
+		function drawChart(response) {
+			var data = processResponses(response.title||"Poll #"+response.poll_id,response);
+
+			function chartIn() { $("div#main canvas#chart").fadeIn(); }
+			if ($('div#custom-poll').is(":visible"))
+				$('div#custom-poll').fadeOut(chartIn);
+			else if ($('div#timer').is(':visible'))
+				$('div#timer').fadeOut(chartIn);
+			else
+				$("div#main canvas#chart").fadeIn();
+			
+			var ctx = $("div#main canvas#chart");
+			if (myBarChart)
+				myBarChart.destroy();
+			debugger;
+			myBarChart = new Chart(ctx, {
+			    type: 'bar',
+			    data: data,
+			    options: {
+			        scales: {
+			            yAxes: [{
+			                ticks: {
+			                    beginAtZero:true
+			                }
+			            }]
+			        }
+			    }
+			});
+		}
+
+		$('table').on('click', 'tr#poll', function (event) {
+			ajaxPost({action:'get_poll', poll_id:$(event.currentTarget).attr('data')},
+				function (response) {
+					drawChart(response);
+				})
+		})
+
+		getActive();
+		getArchive();
+	});
+</script>
