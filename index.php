@@ -96,7 +96,7 @@ if ( $USER->instructor) {
 			)
 		);
 		
-		$stmt = $PDOX->queryDie("UPDATE iclicker_polls SET active=1")
+//		$stmt = $PDOX->queryDie("UPDATE iclicker_polls SET active=1");
 		if (!$stmt->success) {
 			error_log("TODO: unable to move to active. What to do...");
 			throw new Exception("failed to insert into active table");
