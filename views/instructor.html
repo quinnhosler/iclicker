@@ -11,7 +11,7 @@
 	}
 
 	#alerts {
-		height:100px;
+		height:60px;
 	}
 
 	.alert {
@@ -74,6 +74,8 @@
 	div#active-table {
 		min-height: 105px;
 	}
+
+	
 </style>
 <nav class="navbar navbar-default">
 	<div class="container-fluid">
@@ -102,34 +104,28 @@
 						<li><a id='cp'>Custom Poll</a></li>
 					</ul>
 				</li>
-				<li class="active"><a href="#">Link <span class="sr-only">(current)</span></a></li>
-				<li><a href="#">Link</a></li>
-			</ul>
-			<form class="navbar-form navbar-left" role="search">
-				<div class="form-group">
-					<input type="text" class="form-control" placeholder="Search">
-				</div>
-				<button type="submit" class="btn btn-default">Submit</button>
-			</form>
-			<ul class="nav navbar-nav navbar-right">
-				<li><a href="#">Link</a></li>
 				<li class="dropdown">
-					<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>
+					<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Controls<span class="caret"></span></a>
 					<ul class="dropdown-menu">
-						<li><a href="#">Action</a></li>
-						<li><a href="#">Another action</a></li>
-						<li><a href="#">Something else here</a></li>
-						<li role="separator" class="divider"></li>
-						<li><a href="#">Separated link</a></li>
+				<li><a id='resume'><span class="glyphicon glyphicon-play" aria-hidden="true"></span> Resume</a></li>
+				<li><a id='pause'><span class="glyphicon glyphicon-pause" aria-hidden="true"></span> Pause</a></li>
+				<li><a id='stop'><span class="glyphicon glyphicon-stop" aria-hidden="true"></span> Stop</a></li>
+				<!-- <li><a id='next'><span class="glyphicon glyphicon-step-forward" aria-hidden="true"></span> Next</a></li> -->
 					</ul>
 				</li>
+				<li><a id='repeat'>Repeat Poll</a></li>
+
+				</ul>
+			</ul>
+			<ul class="nav navbar-nav navbar-right">
+				<li><a id="results">Results Window</a></li>
 			</ul>
 		</div><!-- /.navbar-collapse -->
 	</div><!-- /.container-fluid -->
 </nav>
 
 
-<div id='main' style="min-height: 300px;">
+<div id='main' style="min-height: 300px;" data="">
 
 	<div id="alerts" align=center style="display: none;">
 		<div class="alert alert-success" role="alert" style='display:none;'>
@@ -140,13 +136,14 @@
 		</div>
 	</div>
 
-	<canvas id="chart" style="display: none;">
+	<canvas data='' id="chart" style="display: none;">
 	</canvas>
 
-	<div id="timer" align="center" style="font-family: monospace; display: none;">
-		<span id="seconds" style="font-size: 200px">60</span>
+	<div id="timer" align="center" style="font-family: monospace;display: none;">
+	<!-- <span style="font-size:5em">Title</span><br> -->
+		<span id="seconds" style="font-size: 15em">60</span>
 		<br>
-		<span style="font-size: 50px">seconds</span>
+		<span style="font-size: 4em">seconds</span>
 	</div>
 
 
@@ -194,7 +191,7 @@
 	<h4 style="display: block;">Active Polls</h4>
 	<table class="table table-hover" id="active">
 		<thead> 
-			<tr> <th>Title</th> <th>Created</th> <th>Responses</th> <th>Retract</th> </tr> 
+			<tr> <th>Title</th> <th>Created</th> <th>Responses</th> <th>Options</th> </tr> 
 		</thead>
 		<tbody> 
 
@@ -204,8 +201,23 @@
 <!-- http://tobiasahlin.com/spinkit/ -->
 <!-- <div class="spinner"><div class="rect1"></div><div class="rect2"></div><div class="rect3"></div><div class="rect4"></div><div class="rect5"></div></div> -->
 
-<h4>Past Polls</h4>
-<table class="table table-hover" id="archive" style="margin-bottom: 0px">
+<h4>Pending Polls</h4>
+<div style="min-height: 75px">
+<table class="table table-hover" id="pending">
+	<thead> 
+		<tr> <th>Title</th> <th>Created</th> <th>Responses</th> <th>Options</th> </tr> 
+	</thead>
+	<tbody> 
+		 <!-- <tr><td>Title</td><td>Created</td> <td>Responses</td> <td>Start</td></tr> -->
+	</tbody>
+	<tfoot>
+	</tfoot>
+</table>
+</div>
+
+<div>
+<h4>Completed Polls</h4>
+<table class="table table-hover" id="archive" style="margin-bottom: 0px" data='5'>
 	<thead> 
 		<tr> <th>Title</th> <th>Completed</th> <th>Responses</th> <th>Correct</th> </tr> 
 	</thead>
@@ -217,6 +229,7 @@
 </table>
 <div align=center>
 	<a id='more'>See More</a>
+</div>
 </div>
 
 
@@ -233,7 +246,10 @@
 
 	<table>
 		<tbody id="active">
-			<tr id="poll" data=""> <td id="title"></td> <td id="date"></td> <td id="responses"></td> <td><button class='btn btn-default btn-xs' id='retract'>Retract</button></td> </tr> 
+			<tr id="poll" data=""> <td id="title"></td> <td id="date"></td> <td id="responses"></td> <td><a id='retract'>Retract</a></td> </tr> 
+		</tbody>
+		<tbody id="pending">
+			<tr id="poll" data=""> <td id="title"></td> <td id="date"></td> <td id="responses"></td> <td><a id='start'>Start</a>&nbsp&nbsp&nbsp<a id='delete'>Delete</a></td> </tr> 
 		</tbody>
 		<tbody id="archive">
 			<tr id="poll" data=""> <td id="title"></td> <td id="date"></td> <td id="responses"></td> <td id='correct'></td> </tr> 
@@ -251,20 +267,33 @@
 		$("input[type=submit]").click(function(event) {
 			// post form to server; "form" selected due to LTI requirements
 			var form_data = $("form#multiple-choice").serializeObject();
+			if (!$('form#multiple-choice input#immediately').is(':checked'))
+				form_data.action = 'save'
 			if (form_data.choice.indexOf("") >= 0) {
 				errorAlert("You left a choice field blank",3000)
 				return;
 			}
-			$.post(location.href, form_data)
-			.done(function (data) {
-				$('form#multiple-choice')[0].reset();
-				successAlert("Your poll was successfully sent to the class!", 5000);
-				data = JSON.parse(data);
-				data.title = form_data.title;
-				data.count = "0";
-				prependToTable('active', data, true);
-				$('div#custom-poll').fadeOut();
-			});
+			ajaxPost(form_data, function (response) {
+				debugger;
+				if (response.action) {
+					if (response.result) {
+						successAlert("Your poll was successfully saved!", 5000);
+						prependToTable('pending', response);
+						$('div#custom-poll').fadeOut();
+						$('form#multiple-choice')[0].reset();
+					} else {
+						errorAlert("Unable to save your poll!", 3000);
+					}
+				} else {
+					successAlert("Your poll was successfully sent to the class!", 5000);
+					response.title = form_data.title;
+					prependToTable('active', response, true);
+					if ($('div#main form input#quick').is(':checked'))
+						startTimer(response.poll_id);
+					else
+						$('div#custom-poll').fadeOut();
+				}
+			})
 		});
 
 		function incrementChoice(input) {
@@ -306,11 +335,10 @@
 		}
 
 		function addActive(response) {
-			var row = $('div.templates table tr').clone();
+			var row = $('div.templates table#active tr').clone();
 			row.attr('data', response.poll_id);
 			row.find('#date').text(response.modified);
 			row.find('#responses').text(response.count);
-			row.find('#correct').html("<button class='btn btn-default btn-xs' id='retract'>Retract</button>");
 			if (!response.title)
 				row.find('#title').text("Poll #"+response.poll_id);
 			else
@@ -350,7 +378,7 @@
 		});
 
 // 		Retract polls, remove from DOM, and alert
-$("table").on("click", "button#retract", function(event) {
+$("table").on("click", "a#retract", function(event) {
 	event.stopPropagation();
 	retractPoll($(event.target).parents('tr').attr('data'));
 });
@@ -358,16 +386,20 @@ $("table").on("click", "button#retract", function(event) {
 function retractPoll(poll_id) {
 	$.post(location.href, {'action':'retract_poll', 'poll_id':poll_id})
 	.done(function(response) {
-		debugger;
 		if (response == 'true') {
 			successAlert("poll retracted", 2000);
-			$("table#active tr#poll").clone().prependTo($("table#archive tbody")).show('fade');
 			removeFromTable('active',poll_id);
+			ajaxPost({action:'get_poll',poll_id:poll_id}, function (response) {
+				response.date = response.completed;
+				prependToTable("archive", response);
+				drawChart(response);
+			})
 		}
 	});
 }
 
 function removeFromTable(table,poll_id) {
+	debugger;
 	var row = $('table#'+table+' tr[data='+poll_id+']');
 	row.hide('fade', function () {
 		this.remove();
@@ -378,15 +410,14 @@ function removeFromTable(table,poll_id) {
 		function prependToTable(table,details,empty) {
 			var row = $('div.templates tbody#'+table+' tr').clone();
 			row.attr('data', details.poll_id);
-			row.find('#date').text(details.date);
-			row.find('#responses').text(details.count);
+			row.find('#date').text(details.date||"Not Recorded");
+			row.find('#responses').text(details.count||0);
 			if (row.find('#correct').length > 0) 
 				row.find('#correct').text(details.correct||0)
 			if (!details.title)
 				row.find('#title').text("Poll #"+details.poll_id);
 			else
 				row.find('#title').text(details.title);
-			// $('table#'+table+' tbody').prepend(row);
 			row.hide();
 			if (empty)
 				row.prependTo($('table#'+table+' tbody').empty()).show('fade');
@@ -397,8 +428,8 @@ function removeFromTable(table,poll_id) {
 		function appendToTable(table,details,empty) {
 			var row = $('div.templates tbody#'+table+' tr').clone();
 			row.attr('data', details.poll_id);
-			row.find('#date').text(details.date);
-			row.find('#responses').text(details.count);
+			row.find('#date').text(details.date||"Not Recorded");
+			row.find('#responses').text(details.count||0);
 			if (row.find('#correct').length > 0) 
 				row.find('#correct').text(details.correct||0)
 			if (!details.title)
@@ -487,7 +518,11 @@ function removeFromTable(table,poll_id) {
 		})
 
 		$('a#more').click(function(event) {
-			getArchive($('table#archive tr').length-1);
+			debugger;
+			var start = parseInt($('table#archive').attr('data'));
+			getArchive(start);
+			$('table#archive').attr('data', start+5);
+
 		})
 
 		function getArchive(range,prepend) {
@@ -496,6 +531,7 @@ function removeFromTable(table,poll_id) {
 				range: ""+range
 
 			}, function (response) {
+				debugger;
 				for (i in response) {
 					if (prepend)
 						prependToTable('archive',response[i],false);
@@ -515,17 +551,13 @@ function removeFromTable(table,poll_id) {
 				datasets: [
 					{ 
 						label: title,
-						backgroundColor: "rgba(75,192,192,0.4)",
-						borderColor: "rgba(75,192,192,1)",
-						hoverBackgroundColor: "rgba(75,192,192,1)",
-						hoverBorderColor: "rgba(220,220,220,1)",
 						data: []
 					}
 				]
 			};
 
 			for (i in responses) {
-				data.datasets[0].data[choices.indexOf(responses[i].value)] = responses[i].count;
+				data.datasets[0].data[choices.indexOf(responses[i].value)] = parseInt(responses[i].count);
 			}
 			for (var i = 0; i < data.labels.length; i++) {
 				if (data.datasets[0].data[i] == null)
@@ -544,18 +576,21 @@ function removeFromTable(table,poll_id) {
 			else
 				timerIn()
 
+			$('div#main').attr('data',poll_id);
+			$('div#main div#timer').attr('data', poll_id);
 			var d = new Date();
 			var seconds = $('div#timer span#seconds')
 			localStorage.setItem(""+poll_id, d.setSeconds(d.getSeconds() + 60));
 			if (interval)
 				clearInterval(interval);
+			if (result_window)
+				result_window.startTimer(poll_id, 60);
 			interval = window.setInterval(function () {
-				// debugger;
 				var diff = localStorage[poll_id] - (new Date().setSeconds(new Date().getSeconds()))
 				seconds.text(""+parseInt(diff/1000));
 				if (diff/1000 <= 0) {
 					retractPoll(poll_id);
-					clearInterval(interval);
+					clearInterval(interval); interval = null;
 					ajaxPost({action:'get_poll', poll_id:poll_id},
 						function (response) {
 							debugger;
@@ -567,9 +602,78 @@ function removeFromTable(table,poll_id) {
 			}, 500);
 		}
 
+		$('nav a#pause').click(function (event) {
+			var poll_id = $('div#main div#timer').attr('data');
+			var diff = parseInt((localStorage[poll_id] - (new Date().setSeconds(new Date().getSeconds())))/1000)
+			localStorage[poll_id] = diff;
+			clearInterval(interval); interval = null;
+			if (result_window)
+				result_window.stopTimer();
+		});
+
+		$('nav a#resume').click(function (event) {
+
+			if (!$('div#main div#timer').is(':visible')) {
+				$('div#main canvas#chart').fadeOut(function() {
+					$('div#main form').fadeOut(function () {
+						$('div#main div#timer').fadeIn();
+					})
+				})
+			}
+
+			if (interval)
+				return;
+
+			var poll_id = $('div#main div#timer').attr('data');
+			$('div#main').attr('data', poll_id);
+			if (localStorage[poll_id] < 60) {
+				var d = new Date();
+				if (result_window)
+					result_window.startTimer(poll_id,localStorage[poll_id]);
+
+				localStorage.setItem(""+poll_id, d.setSeconds(d.getSeconds() + parseInt(localStorage[poll_id])));
+				var seconds = $('div#timer span#seconds')
+				interval = window.setInterval(function () {
+					debugger;
+					var diff = localStorage[poll_id] - (new Date().setSeconds(new Date().getSeconds()))
+					seconds.text(""+parseInt(diff/1000));
+					if (diff/1000 <= 0) {
+						retractPoll(poll_id);
+						clearInterval(interval);
+						ajaxPost({action:'get_poll', poll_id:poll_id},
+							function (response) {
+								debugger;
+								$('div#timer').fadeOut(function () {
+									drawChart(response);
+								})
+							})
+					}
+				}, 500);
+			} else {
+				errorAlert("No Poll to Stop");
+			}
+		})
+
+		$('nav a#stop').click(function (event) {
+			debugger;
+			retractPoll($('div#main div#timer').attr('data'));
+			ajaxPost({'action':'get_poll',poll_id:$('div#main div#timer').attr('data')}, function (response) {
+				drawChart(response);
+			})
+			if (interval) {
+				clearInterval(interval); interval = null;
+			}
+		})
+
 		var myBarChart;
 		function drawChart(response) {
 			var data = processResponses(response.title||"Poll #"+response.poll_id,response);
+
+			var details = {type: 'bar', data: data, options: { scales: { yAxes: [{ ticks: { beginAtZero:true}}]}}}
+			if (result_window) {
+				details_copy = $.extend(true, {}, details);
+				result_window.drawChart(details_copy);
+			}
 
 			function chartIn() { $("div#main canvas#chart").fadeIn(); }
 			if ($('div#custom-poll').is(":visible"))
@@ -580,22 +684,13 @@ function removeFromTable(table,poll_id) {
 				$("div#main canvas#chart").fadeIn();
 			
 			var ctx = $("div#main canvas#chart");
+			$('div#main').attr('data', response.poll_id)
 			if (myBarChart)
 				myBarChart.destroy();
-			debugger;
-			myBarChart = new Chart(ctx, {
-			    type: 'bar',
-			    data: data,
-			    options: {
-			        scales: {
-			            yAxes: [{
-			                ticks: {
-			                    beginAtZero:true
-			                }
-			            }]
-			        }
-			    }
-			});
+
+			
+			myBarChart = new Chart(ctx, details);
+			
 		}
 
 		$('table').on('click', 'tr#poll', function (event) {
@@ -605,7 +700,84 @@ function removeFromTable(table,poll_id) {
 				})
 		})
 
+		var result_window;
+		$('nav a#results').click(function (event) {
+			if (result_window)
+				result_window.close();
+			result_window = window.open()
+
+			$.post(location.href, {action:'results_window'}, function (response) {
+				if ($('div#main canvas#chart').is(':visible')) {
+					window.childReady = function () {
+						ajaxPost({action:'get_poll', poll_id:$('div#main').attr('data')}, function (response) {
+							var data = processResponses(response.title||"Poll #"+response.poll_id,response);
+							var details = {type: 'bar', data: data, options: { scales: { yAxes: [{ ticks: { beginAtZero:true}}]}}};
+							result_window.drawChart(details);
+							});
+					}
+					result_window.document.write(response);
+				} else if ($('div#main div#timer').is(':visible')) {
+					window.childReady = function () {
+						ajaxPost({action:'get_poll', poll_id:$('div#main').attr('data')}, function (response) {
+							debugger;
+							var data = processResponses(response.title||"Poll #"+response.poll_id,response);
+							result_window.startTimer(response.poll_id,parseInt((localStorage[poll_id] - (new Date().setSeconds(new Date().getSeconds())))/1000));
+					})
+					result_window.document.write(response);
+				}
+			} else {
+				result_window.document.write(response);
+			}
+		});
+	});
+
+
+		$('nav a#repeat').click(function (event) {
+			var poll_id = $('div#main').attr('data');
+			if (!poll_id) {
+				errorAlert("no poll was selected to repeat"); return;
+			}
+
+			ajaxPost({action:'copy_poll',poll_id:poll_id}, function (response) {
+				debugger;
+			})
+		})
+
+		function getPending() {
+			ajaxPost({action:'get_pending'}, function (response) {
+				if (!response.result) {
+					errorAlert("unable to get pending polls"); return;
+				}
+				for (i in response.result) {
+					prependToTable("pending",response.result[i]);
+				}
+			})
+		}
+
+		$('table').on('click', 'a#delete', function (event) {
+			event.stopPropagation();
+			ajaxPost({action:'delete_poll',poll_id:$(event.target).parents('tr').attr('data')}, function (response) {
+				removeFromTable('pending', $(event.target).parents('tr').attr('data'));
+			})
+		})
+
+		$('table').on('click', 'a#start', function (event) {
+			debugger;
+			event.stopPropagation();
+			ajaxPost({action:'make_active', poll_id:$(event.target).parents('tr').attr('data')}, function (response) {
+				removeFromTable('pending', $(event.target).parents('tr').attr('data'));
+				ajaxPost({action:'get_active'}, function(res) {
+					res.date = res.modified;
+					prependToTable('active', res, true);
+					startTimer(res.poll_id);
+				});
+			})
+		})
+
+
+
 		getActive();
+		getPending();
 		getArchive();
 	});
 </script>
