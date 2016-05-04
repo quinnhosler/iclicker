@@ -4,16 +4,6 @@
 		width:60%;
 	}
 
-	form {
-		margin: 50px;
-		border: 3px solid #73AD21;
-		margin-bottom: 5px;
-		padding-bottom: 20px;
-		margin-top: 5px;
-		padding-top: 20px;
-		text-align: center;
-	}
-
 	.btn-block {
 		max-width: 400px;
 	}
@@ -33,7 +23,14 @@
 	}
 </style>
 
-<div id="main">
+<div id="warning" align=center style="display: none;">
+	<div class='alert alert-warning' role='alert' style=''>
+		<strong>Warning!</strong> <span id='message'>Websocket disconnected! You will need to refresh the page to view the lastest poll</span>
+	</div>
+</div>
+<div id="main" align='center' style='padding-top:15%; padding-left: 10%; padding-right: 10%;'>
+
+
 </div>
 
 
@@ -42,7 +39,7 @@
 	<form id='multiple-choice' class='active form-horizontal' data=''>
 	</form>
 	<div class='form-group' id='choice' data="">
-		<button class="btn btn-primary btn-block form-control"></button>
+		<button class="btn btn-primary btn-block form-control" style='text-align: center;'></button>
 	</div>
 </div>
 
@@ -100,17 +97,32 @@
 				})
 		});
 
-		var conn = new ab.Session('ws://colab-sbx-377.oit.duke.edu:8080',
+
+		var conn, interval;
+		function connectWebsocket() {
+			conn = new ab.Session('ws://colab-sbx-377.oit.duke.edu:8080',
 			function() {
 				conn.subscribe('polls', function(topic, data) {
 					populateMultipleChoice(data);
 				});
+				conn.subscribe('retract', function(topic,data) {
+					console.log('received retraction');
+					$("div#main form button").attr("disabled", true);
+				})
+				$('#warning').toggle(false);
+				clearInterval(interval);
 			},
 			function() {
 				console.warn('WebSocket connection closed');
+				$('#warning').toggle(true);
+				interval = setInterval(function () {
+					connectWebsocket();
+				}, 1000);
 			},
 			{'skipSubprotocolCheck': true}
 		);
+		}
+		
 
 		$.post(location.href, {'action': 'get_active'})
 			.done(function (response) {
@@ -125,5 +137,6 @@
 				populateMultipleChoice(data);
 				getVoted(data.poll);
 			});
+		connectWebsocket();
 	});
 </script>
