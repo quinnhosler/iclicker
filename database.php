@@ -12,7 +12,8 @@ $DATABASE_UNINSTALL = array(
 	"drop table if exists {$CFG->dbprefix}iclicker_active",
 	"drop table if exists {$CFG->dbprefix}iclicker_polls",
 	"drop table if exists {$CFG->dbprefix}iclicker_responses",
-	"drop table if exists {$CFG->dbprefix}iclicker_choices"
+	"drop table if exists {$CFG->dbprefix}iclicker_choices",
+	"drop table if exists {$CFG->dbprefix}iclicker_pollchoices"
 );
 
 
@@ -30,6 +31,9 @@ $DATABASE_INSTALL = array(
 		context_id INTEGER NOT NULL,
 		answer_id INTEGER,
 		ordered INTEGER,
+		active INTEGER,
+		pending INTEGER,
+		title TEXT,
 		modified DATETIME NOT NULL,
 		completed DATETIME
 	)"),
@@ -47,6 +51,7 @@ $DATABASE_INSTALL = array(
 	array( "{$CFG->dbprefix}iclicker_choices",
 	"create table {$CFG->dbprefix}iclicker_choices (
 		choice_id INTEGER NOT NULL UNIQUE AUTO_INCREMENT PRIMARY KEY,
+		choice_hash VARCHAR(41) NOT NULL,
 		choice_value TEXT
 	)"),
 	
